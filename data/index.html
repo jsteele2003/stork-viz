@@ -3,7 +3,6 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/css/styles.css" /> <!-- use this for layout customizations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.3/ScrollMagic.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.2/TweenMax.min.js"></script>
@@ -20,7 +19,7 @@
   <div class="jumbotron vertical-center">
     <div class="container ">
         <h1>WHITE STORK MIGRATION</h1>
-        Tracking the Flights of 70 Birds, from Northern Europe to Africa
+        Tracking the Flights of 70 Birds, from Europe to Africa
     </div>
 </div>
 <div id="prompt">
@@ -35,6 +34,31 @@
   </div>
   <div id="trigger2"></div>
   <div id="animate2" class="chartContainer1" style="overflow: scroll">
+    
+  <div class="dropdown float-left">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Sort
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="#">Ascending</a>
+    <a class="dropdown-item" href="#">Population</a>
+  </div>
+</div>
+  
+  <div class="btn-group float-right" data-toggle="buttons">
+  <label class="btn btn-secondary active">
+    <input type="radio" name="options" id="option1" autocomplete="off" checked> Distance
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="option2" autocomplete="off"> Energy
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="option3" autocomplete="off"> Temperature
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="option4" autocomplete="off"> Uplift
+  </label>
+</div>
   </div>
 
    <script>
@@ -78,14 +102,25 @@
   
   function setup(storkData){
     // console.log(storkData.storks)
-    var distanceData = [];
-    var storkNames = [];
-    var status = []
+    var storks = [];
 
     //prep data for d3 selection
+    function fillData(){
     Object.entries(storkData.storks).forEach(
-    ([key, value]) => {storkNames.push(key); distanceData.push(value.distance); status.push(value.status)}
-    );
+    ([key, value]) => {
+      let stork = {}
+      stork.name = key;
+      stork.status = value.status;
+      stork.distance = value.distance;
+      stork.uplifts = value.uplift;
+      stork.temps = value.temp;
+      stork.vegs = value.veg;
+      stork.energy = value.energy;
+      storks.push(stork);
+    });
+    }
+    fillData();
+    console.log(storks);
     
     //start flight at 779, end at 1452            
     var myScrollTop = 0;
@@ -97,38 +132,65 @@
       
     })
     
-    function drawLines(){
-        if(myScrollTop > 800){
-          svg
-            .data(distanceData)
-            .enter()
-              .each(function(d,i){
-                svg
-                  .append('line')
-                    .attr("x1", 30 + (window.innerWidth/70)* i)
-                    .attr("y1", 20)
-                    .attr("x2", 30 + (window.innerWidth/70)* i )
-                    .attr("y2", 20 + scale(d))
-                    .attr("stroke-width", 1)
-                    .style('shape-rendering','crispEdges')
-                    .attr("stroke", "black");
-              });
+    function updateData(newData){
+      var lines = svg.data(newData);
+      lines
+          .enter()
+            .each(function(d,i){
+              svg
+                .append('line')
+                  .attr("x1", 30 + ((window.innerWidth-30)/70)* i)
+                  .attr("y1", 20)
+                  .attr("x2", 30 + ((window.innerWidth-30)/70)* i )
+                  .attr("y2", 20)
+                  .attr("stroke-width", 1)
+                  .attr("id", d.name)
+                  .style('shape-rendering','crispEdges')
+                  .attr("stroke", function(){return colour_scale(+d.distance)})
+                  .transition()
+                    .duration(2500)
+                    .attr("y2", 25 + distScale(+d.distance));
+            });
+    }
+    
+    function renderLines(){
+      var lines = svg.data(storks)
+        if(myScrollTop > 1280){
+          updateData(storks);
         } else{
-          window.requestAnimationFrame(drawLines)
+          window.requestAnimationFrame(renderLines)
         }                           
       }
-      window.requestAnimationFrame(drawLines);
+      window.requestAnimationFrame(renderLines);
+      
+      // svg.selectAll(".line")
+      //     .data(storks)
+      //     .enter().append("line")
+      //               .attr("x1", function(d,i){30 + (window.innerWidth/70)* i})
+      //               .attr("y1", 20)
+      //               .attr("x2", function(d,i){30 + (window.innerWidth/70)* i} )
+      //               .attr("y2", function(d,i){25 + distScale(d.distance)})
+      //               .attr("stroke-width", 1)
+      //               .attr("id", function(d,i){d.name})
+      //               .style('shape-rendering','crispEdges')
+      //               .attr("stroke", function(d,i){return colour_scale(d.distance)});
    
   }    
+    var height = window.innerHeight - 40;
     var svg = d3.select(".chartContainer1")
                                     .append("svg")
                                     .attr("width", window.innerWidth)
-                                    .attr("height", window.innerHeight)
+                                    .attr("height", height);
        //Gradient Legend
-    var scale = d3.scaleLinear()
-        .range([0, window.innerHeight - 20])
+    var distScale = d3.scaleLinear()
+        .range([0, height - 20])
         .domain([0, 9997.63953184151]);
-    var legendData = ["0km", "10,000km"];
+        
+    var colour_scale = d3.scaleLinear().domain([0, 9997]).range(["#ffeda0", "#bd0026"]);
+    // console.log(color_scale(0));
+    
+    var distLegend = ["0km", "10,000km"];
+    var mapLegend = ['273k', '300k'];
     
     var defs = svg.append("defs");
     
@@ -150,20 +212,20 @@
                           .attr("stop-color", "#bd0026");
     
     var bar = svg.selectAll("g")
-        .data(legendData)
-      .enter().append("g")
+        .data(distLegend)
+        .enter().append("g")
         .attr("transform", function(d, i) { return "translate(20,20)"; });
     
     var key = bar.append("rect")
                         .attr("width", 10)
-                        .attr("height", window.innerHeight - 40)
+                        .attr("height", height - 40)
                         .attr("id", "legend")
                         .style("fill", "url(#distance-gradient)");
     
     bar.append("text")
     .attr("dy", "-.35em")
     .style('fill', "white")
-    .attr("transform", function(d,i){return 'translate(0,' + i * (window.innerHeight - 20) + ")";})
+    .attr("transform", function(d,i){return 'translate(0,' + i * (height - 20) + ")";})
     .text(function(d, i) { return d; });
     
 

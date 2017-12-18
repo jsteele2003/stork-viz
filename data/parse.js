@@ -11,7 +11,7 @@ var rData = {
   
   
 };
-var storks = {};
+var storks = [];
 
 var xParser = parse(function(err, data){
     if (err) throw "read error";
