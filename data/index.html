@@ -1,0 +1,133 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/css/styles.css" /> <!-- use this for layout customizations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.3/ScrollMagic.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.2/TweenMax.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.3/plugins/animation.gsap.js"></script>
+  <script src= "//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.3/plugins/debug.addIndicators.js"></script>
+</head>
+<body>
+  <script>
+	// init controller
+	var controller = new ScrollMagic.Controller();
+  </script>
+  <div class="jumbotron vertical-center">
+    <div class="container ">
+        <h1>WHITE STORK MIGRATION</h1>
+        Tracking the Flights of 70 Birds, from Northern Europe to Africa
+    </div>
+</div>
+  <div id="trigger1"></div>
+  <div id="prompt">
+    (Fly South ↓ )
+  </div>
+   <div id="intro">
+    First, Some Context
+  </div>
+  <div id="animate1" class="panel panel-default">
+    <IMG SRC="./assets/img/three-seagulls.png" ALT="some text" WIDTH=64 HEIGHT=64>
+   
+  </div>
+  <div id="trigger2"></div>
+  <div id="animate2" class="chartContainer1">
+  </div>
+
+   <script>
+		// build scene
+		// var scene = new ScrollMagic.Scene({
+		// 					triggerElement: "#trigger1", duration: "100%"
+		// 				})
+		// 				.addTo(controller);
+						
+						
+		var scene1 = new ScrollMagic.Scene({
+							triggerElement: "#trigger1", duration: "100%"
+						})
+						.setTween("#animate1", 1, {scale: 1.3, repeat: 5, yoyo: true})
+						.addIndicators({name: "1 (duration: 100%)"})
+						.setPin('.panel')
+						.addTo(controller);
+		
+	  var scene2 = new ScrollMagic.Scene({
+	        triggerElement: "#trigger2",
+						})
+						.setTween("#animate2", {backgroundColor: "#252525"})
+						.addIndicators({name: "2 (duration: 1)"})
+						.addTo(controller);
+						
+    </script>
+  
+  <script type="text/javascript">
+  
+  d3.json("./assets/data/storkData.json", function (error, data){
+      if (error) console.log(error);
+      else{
+        console.log(Object.keys(data.storks).length)
+        setup(data)
+      }
+    })
+  
+  
+  function setup(storkData){
+    var legendData = ["0km", "10,000km"];
+    var svg = d3.select(".chartContainer1").append("svg")
+                                    .attr("width", window.innerWidth)
+                                    .attr("height", window.innerHeight);
+
+    var currentScrollTop = d3.select('#currentScrollTop')
+    
+    var defs = svg.append("defs");
+    
+    var distanceGradient = defs.append("linearGradient")
+                                  .attr("id", "distance-gradient");
+    
+    
+    distanceGradient
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "0%")
+      .attr("y2", "100%");
+    
+    distanceGradient.append("stop") 
+                          .attr("offset", "0%")   
+                          .attr("stop-color", "#ffeda0");
+                          
+    distanceGradient.append("stop") 
+                          .attr("offset", "100%")   
+                          .attr("stop-color", "#bd0026");
+    
+    var bar = svg.selectAll("g")
+        .data(legendData)
+      .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(20,20)"; });
+    
+    var key = bar.append("rect")
+                        .attr("width", 10)
+                        .attr("height", window.innerHeight - 40)
+                        .attr("id", "legend")
+                        .style("fill", "url(#distance-gradient)");
+    
+    bar.append("text")
+    .attr("dy", "-.35em")
+    .style('fill', "white")
+    .attr("transform", function(d,i){console.log(i);return 'translate(0,' + i * (window.innerHeight - 20) + ")";})
+    .text(function(d, i) { return d; });
+  }             
+    
+    
+
+
+  </script>
+  
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+</body>
+</html>
+
+ 
