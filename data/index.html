@@ -115,21 +115,11 @@
       stork.temps = value.temp;
       stork.vegs = value.veg;
       stork.population = value.population;
-      stork.energy = value.energy[energy.length -1];
+      stork.energy = value.energy;
       storks.push(stork);
     });
     }
     fillData();
-    
-    
-    console.log(storks);
-    
-    //start flight at 779, end at 1452            
-    var myScrollTop = 0;
-    d3.select(window)
-    .on("scroll.scroller", function (){
-      myScrollTop = window.pageYOffset;
-    })
     
        d3.select('#sortAscending')
     .on('click', function() {
@@ -145,6 +135,28 @@
         return 35 + ((window.innerWidth-30)/70)* i;
       })
   });
+  
+  d3.select('#sortPop')
+    .on('click', function() {
+      svg.selectAll(".line").sort(function(x, y) {
+      return d3.ascending(y.population, x.population);
+      })
+      .transition().duration(500)
+      .attr("x1", function(d, i) {
+        return 35 + ((window.innerWidth-30)/70)* i;
+      })
+      .attr("x2", function(d, i) {
+        console.log(d);
+        return 35 + ((window.innerWidth-30)/70)* i;
+      })
+  });
+  
+   //start flight at 779, end at 1452            
+    var myScrollTop = 0;
+    d3.select(window)
+    .on("scroll.scroller", function (){
+      myScrollTop = window.pageYOffset;
+    })
     
     function updateData(data){
      //attempt with selectAll()
