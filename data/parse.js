@@ -30,6 +30,7 @@ var xParser = parse(function(err, data){
         if(!(name in storks)){
             var stork = {};
             stork.population = row[11];
+            stork.startDate = row[1];
             stork.distance = row[13];
             stork.status = "";
             stork.uplift = [row[9]];

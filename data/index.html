@@ -40,8 +40,8 @@
     Sort
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <a class="dropdown-item" href="#">Ascending</a>
-    <a class="dropdown-item" href="#">Population</a>
+    <a class="dropdown-item" id="sortAscending">Ascending</a>
+    <a class="dropdown-item" id="sortPop">Population</a>
   </div>
 </div>
   
@@ -50,7 +50,7 @@
     <input type="radio" name="options" id="option1" autocomplete="off" checked> Distance
   </label>
   <label class="btn btn-secondary">
-    <input type="radio" name="options" id="option2" autocomplete="off"> Energy
+    <input type="radio" name="options" id="energy" autocomplete="off"> Energy
   </label>
   <label class="btn btn-secondary">
     <input type="radio" name="options" id="option3" autocomplete="off"> Temperature
@@ -89,8 +89,6 @@
     </script>
   
   <script type="text/javascript">
-     
-  
   
   d3.json("./assets/data/storkData.json", function (error, data){
       if (error) console.log(error);
@@ -98,63 +96,81 @@
         setup(data);
       }
     });
-    
   
   function setup(storkData){
     // console.log(storkData.storks)
     var storks = [];
+    var feature = "distance";
+   
 
     //prep data for d3 selection
     function fillData(){
     Object.entries(storkData.storks).forEach(
     ([key, value]) => {
-      let stork = {}
+      let stork = {};
       stork.name = key;
       stork.status = value.status;
       stork.distance = value.distance;
       stork.uplifts = value.uplift;
       stork.temps = value.temp;
       stork.vegs = value.veg;
-      stork.energy = value.energy;
+      stork.population = value.population;
+      stork.energy = value.energy[energy.length -1];
       storks.push(stork);
     });
     }
     fillData();
+    
+    
     console.log(storks);
     
     //start flight at 779, end at 1452            
     var myScrollTop = 0;
-    var newScrollTop = 0;
     d3.select(window)
     .on("scroll.scroller", function (){
       myScrollTop = window.pageYOffset;
-  
-      
     })
     
-    function updateData(newData){
-      var lines = svg.data(newData);
+       d3.select('#sortAscending')
+    .on('click', function() {
+      svg.selectAll(".line").sort(function(x, y) {
+      return d3.ascending(+y.distance, +x.distance);
+      })
+      .transition().duration(500)
+      .attr("x1", function(d, i) {
+        return 35 + ((window.innerWidth-30)/70)* i;
+      })
+      .attr("x2", function(d, i) {
+        console.log(d);
+        return 35 + ((window.innerWidth-30)/70)* i;
+      })
+  });
+    
+    function updateData(data){
+     //attempt with selectAll()
+      var lines = svg.selectAll('line').data(data, function(d){
+        return d.name;
+      });
       lines
           .enter()
-            .each(function(d,i){
-              svg
                 .append('line')
-                  .attr("x1", 30 + ((window.innerWidth-30)/70)* i)
+                  .attr("class", "line")
+                  .attr("id", function(d){return d.name})
                   .attr("y1", 20)
-                  .attr("x2", 30 + ((window.innerWidth-30)/70)* i )
                   .attr("y2", 20)
+                  .attr("x1", function(d,i){console.log(d);return 30 + ((window.innerWidth-30)/70)* i})
+                  .attr("x2", function(d,i){return 30 + ((window.innerWidth-30)/70)* i} )
                   .attr("stroke-width", 1)
-                  .attr("id", d.name)
                   .style('shape-rendering','crispEdges')
-                  .attr("stroke", function(){return colour_scale(+d.distance)})
+                  .attr("stroke", function(d,i){return colour_scale(+d.distance)})
                   .transition()
                     .duration(2500)
-                    .attr("y2", 25 + distScale(+d.distance));
-            });
+                    .attr("y2", function(d,i){return 25 + distScale(+d.distance)})
+                  .transition()
+                    .attr("stroke", function(d,i){if(d.status ==  "dead"){return "lightgray"}else{return colour_scale(+d.distance)}});
     }
-    
+
     function renderLines(){
-      var lines = svg.data(storks)
         if(myScrollTop > 1280){
           updateData(storks);
         } else{
@@ -162,18 +178,6 @@
         }                           
       }
       window.requestAnimationFrame(renderLines);
-      
-      // svg.selectAll(".line")
-      //     .data(storks)
-      //     .enter().append("line")
-      //               .attr("x1", function(d,i){30 + (window.innerWidth/70)* i})
-      //               .attr("y1", 20)
-      //               .attr("x2", function(d,i){30 + (window.innerWidth/70)* i} )
-      //               .attr("y2", function(d,i){25 + distScale(d.distance)})
-      //               .attr("stroke-width", 1)
-      //               .attr("id", function(d,i){d.name})
-      //               .style('shape-rendering','crispEdges')
-      //               .attr("stroke", function(d,i){return colour_scale(d.distance)});
    
   }    
     var height = window.innerHeight - 40;
@@ -183,14 +187,15 @@
                                     .attr("height", height);
        //Gradient Legend
     var distScale = d3.scaleLinear()
-        .range([0, height - 20])
+        .range([0, height - 50])
         .domain([0, 9997.63953184151]);
         
     var colour_scale = d3.scaleLinear().domain([0, 9997]).range(["#ffeda0", "#bd0026"]);
     // console.log(color_scale(0));
     
     var distLegend = ["0km", "10,000km"];
-    var mapLegend = ['273k', '300k'];
+    var tempLegend = ['273k', '300k'];
+    var energyLegend = [];
     
     var defs = svg.append("defs");
     
