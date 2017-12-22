@@ -9,7 +9,7 @@ html, body {
   box-shadow: 0 8px 16px -6px black;
   background-color: #fd8d3c;
   font-family: Raleway;
-  min-height: 85%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 85%;  
   text-align: center;
   display: flex;
   align-items: center;
