@@ -23,7 +23,7 @@ var xParser = parse(function(err, data){
     })
     // console.log(storks['Benjamin (DER AN867)'].energy.length)
     
-    fs.createReadStream('./assets/MPIO_white_stork_lifetime_tracking_data_(2013-2014)-reference-data.csv').pipe(yParser);
+    fs.createReadStream('../assets/MPIO_white_stork_lifetime_tracking_data_(2013-2014)-reference-data.csv').pipe(yParser);
     
     function addRow(row){
         var name = row[0];
@@ -77,4 +77,4 @@ var yParser = parse(function(err, data){
     }
 })
 
-fs.createReadStream('./assets/final_data_merged.csv').pipe(xParser);
+fs.createReadStream('../assets/final_data_merged.csv').pipe(xParser);
